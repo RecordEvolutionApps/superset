@@ -1,34 +1,19 @@
-############################################################
-# Sample Data Template
-#
-# In this template you can describe the structure of the cloud data storage that the app can use to collect data from devices.
-# You can define tables and their columns and you can additionally describe "transforms".
-# Transformes are basically TimescaleDB SQL statements that can use the data in the defined tables to create and store aggregates.
-# When a user installs this app on a device in his/her fleet, then these structures will be created in
-# a TimescaleDB database in the cloud that is private to that fleet.
-# To send data from a device to these tables in the cloud you can use the ironflock-py or ironflock-js libraries like this: 
-# rw.publish_to_table('mytablename', {tsp: '2024-01-01T00:00:00', temperature: '22'})
-# When you publish data to the table you are using a secure realm in the IronFlock WAMP Messaging Cluster that is private to the fleet.
-# The data that you publish is mapped to the individual columns using the path property in the column definitions.
-# Here the 'args' keyword represents the list of arguments following the tablename in the publish_to_table function. 
-############################################################
-
 data:
   tables:
     - tablename: sensordata
-      chunkTimeInterval: 1 hour # (optional) Sets the default partition size of this table. Users of the app can adjust this in their databackends.
-      dropAfter: 2 hour # (optional) All partitions older than this interval will be dropped from the table. (The system checks in a <dropAfter>/4 interval schedule.)
+      chunkTimeInterval: 1 hour
+      dropAfter: 2 hour
       columns:
-        - id: tsp # This column (with id: tsp) is mandatory!
+        - id: tsp
           name: Timestamp
           description: Timestamp of Measurement
           path: args[0].tsp
-          dataType: timestamp #mandatory
+          dataType: timestamp
         - id: temp1
           name: Temperature
           description: Temperature from DHT11 Sensor in Celcius
           path: args[0].temperature
-          dataType: numeric  # possible values: string, numeric, boolean, timestamp
+          dataType: numeric
         - id: humidity
           name: Humidity
           description: Humidity from DHT11 Sensor in %
@@ -39,14 +24,13 @@ data:
           description: Name of Device
           path: kwargs.DEVICE_NAME
           dataType: string
-
     - tablename: geodata
       columns:
-        - id: tsp # This column (with id: tsp) is mandatory!
+        - id: tsp
           name: Timestamp
           description: Timestamp of Measurement
           path: args[0].tsp
-          dataType: timestamp #mandatory
+          dataType: timestamp
         - id: lon
           name: Longitude
           description: Longitude of device position
@@ -62,11 +46,10 @@ data:
           description: Name of Device
           path: kwargs.DEVICE_NAME
           dataType: string
-
   transforms:
     - tablename: myagg
       materialize: true
-      schedule: "* * * * *" # crontab interface: Minute(1-60) Hour(1-24) MonthDay(1-31) Month(1-12) WeekDay(1-7)
+      schedule: "* * * * *"
       sql: |
         SELECT
           time_bucket('1 day', tsp) AS daybucket, 
@@ -89,7 +72,7 @@ data:
         - id: max_temp
           name: Maximum Temperature
           description: Maximum Temperature of DHT11 Sensor in Celcius
-          dataType: numeric # (string, numeric, boolean, timestamp)
+          dataType: numeric
         - id: avg_temp
           name: Average Temperature
           description: Average Temperature of DHT11 Sensor in Celcius
