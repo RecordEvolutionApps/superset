@@ -8,7 +8,6 @@ Integrating your app with the IronFlock platform allows your app to leverage dif
 - remote access
 - app parametrization and mass parametrization
 
-
 ## Data Collection
 
 If your app should collect data from multiple devices into a central data store you can use the IronFlock data infrastructure. To set up a data collection backend for your app you need to provide a `data-template.yml` in this folder.
@@ -18,7 +17,6 @@ When a user installs your app on a device in his/her fleet then this will also s
 > The user has full control over the data collected by your app in his/her fleet and you as the developer will not have access to this data!
 
 Once you set up your table structure with the `data-template.yml` your app can start publishing data to these tables. To do this your app needs to use the `publish_to_table` function of the `ironflock` SDK. ([ironflock-py](https://pypi.org/project/ironflock/) or [ironflock-js](https://www.npmjs.com/package/ironflock)).
-
 
 ## Dashboarding
 
@@ -46,7 +44,8 @@ You simply need to provide a `port-template.yml` that details the ports and prot
 
 Once you provided the necessary information in the `port-template.yml` the users of your app can enable or disable remote access, depending on the networking privileges the user has in his/her fleet.
 
-### Example:
+### Example
+
 You device provides a HMI (Human Machine Interface) as web interface to configure machine settings. This web interface is served as a web site by your app on a specific port. If you enter the port name in the `port-template.yml` the IronFlock remote access infrastructure can set up a reverse proxy tunnel so that users can access the HMI with a browser from the internet. Only privileged users of the fleet using your app can control remote access activation/deactivation on devices.
 
 > Every activation and deactivation of a remote access tunnel is logged by IronFlock and can be inspected in the audit log panel of the device. Each actual usage of an activated remote access tunnel is logged there as well.
@@ -86,6 +85,5 @@ With these environment variables your app can detect which device it is running 
 > Parameters can be provided by users even if the app is not running or a device is offline.
 
 **Examples** where Application Parameters should be used are apps that run on many devices and where you want to specify a common target S3 bucket to push the data to. Or if you want to change model parameters for an AI-App on all devices at once.
-
 
 **Examples** where you rather should provide your own web interface in the app are robot training software, Camera AI Setup or complex sensor hardware configuration software.
