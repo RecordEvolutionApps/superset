@@ -17,6 +17,7 @@
 #
 
 set -e
+source /app/docker/.env
 
 # We need at least 3GB of free mem...
 MIN_MEM_FREE_GB=3

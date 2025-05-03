@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 set -e
-
+source /app/docker/.env
 #
 # Always install local overrides first
 #
@@ -77,3 +77,8 @@ if [ "$SUPERSET_LOAD_EXAMPLES" = "yes" ]; then
     fi
     echo_step "4" "Complete" "Loading examples"
 fi
+
+
+echo "init setup done, now sleeping..."
+
+exec sleep infinity

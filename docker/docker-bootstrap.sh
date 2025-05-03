@@ -17,6 +17,7 @@
 #
 
 set -eo pipefail
+source /app/docker/.env
 
 # Make python interactive
 if [ "$DEV_MODE" == "true" ]; then

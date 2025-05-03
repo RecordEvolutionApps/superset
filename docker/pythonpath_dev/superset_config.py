@@ -27,7 +27,13 @@ import sys
 from celery.schedules import crontab
 from flask_caching.backends.filesystemcache import FileSystemCache
 
+from dotenv import load_dotenv
+# Load environment variables from .env file
+load_dotenv(dotenv_path='/app/docker/.env')
+
 logger = logging.getLogger()
+
+SECRET_KEY = os.getenv("SUPERSET_SECRET_KEY")
 
 DATABASE_DIALECT = os.getenv("DATABASE_DIALECT")
 DATABASE_USER = os.getenv("DATABASE_USER")

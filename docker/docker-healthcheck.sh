@@ -15,5 +15,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+source /app/docker/.env
 curl -f "http://localhost:${SUPERSET_PORT}/${SUPERSET_APP_ROOT/\//}/health" || exit 1

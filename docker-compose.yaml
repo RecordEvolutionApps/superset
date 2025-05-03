@@ -24,21 +24,53 @@
 x-superset-image: &superset-image apachesuperset.docker.scarf.sh/apache/superset:4.1.2
 x-superset-volumes:
   &superset-volumes # /app/pythonpath_docker will be appended to the PYTHONPATH in the final container
-  - ./docker:/app/docker
+  # - ./docker:/app/docker
   - superset_home:/app/superset_home
+
+x-common-build: &common-build
+  context: .
+  target: ${SUPERSET_BUILD_TARGET:-lean} # can use `dev` (default) or `lean`
+  args:
+    DEV_MODE: "false"
+    INCLUDE_CHROMIUM: ${INCLUDE_CHROMIUM:-false}
+    INCLUDE_FIREFOX: ${INCLUDE_FIREFOX:-false}
+    BUILD_TRANSLATIONS: ${BUILD_TRANSLATIONS:-true}
 
 services:
   redis:
     image: redis:7
     container_name: superset_cache
     restart: unless-stopped
+    environment:
+      - REDIS_PORT=6379
     volumes:
       - redis:/data
 
   db:
-    env_file:
-      - path: .env # default
-        required: true
+    # env_file:
+    #   - path: docker/.env # default
+    #     required: true
+    environment:
+      # database configurations (do not modify)
+      - DATABASE_DB=superset
+      - DATABASE_HOST=db
+      # Make sure you set this to a unique secure random value on production
+      - DATABASE_PASSWORD=superset
+      - DATABASE_USER=superset
+      - EXAMPLES_DB=examples
+      - EXAMPLES_HOST=db
+      - EXAMPLES_USER=examples
+      # Make sure you set this to a unique secure random value on production
+      - EXAMPLES_PASSWORD=examples
+      - EXAMPLES_PORT=5432
+      # database engine specific environment variables
+      # change the below if you prefer another database engine
+      - DATABASE_PORT=5432
+      - DATABASE_DIALECT=postgresql
+      - POSTGRES_DB=superset
+      - POSTGRES_USER=superset
+      # Make sure you set this to a unique secure random value on production
+      - POSTGRES_PASSWORD=superset
     image: postgres:16
     container_name: superset_db
     restart: unless-stopped
@@ -47,30 +79,34 @@ services:
       - ./docker/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
   superset:
-    env_file:
-      - path: .env # default
-        required: true
-    image: *superset-image
+    # env_file:
+    #   - path: docker/.env # default
+    #     required: true
+    # image: *superset-image
+    build:
+      <<: *common-build
     container_name: superset_app
     command: ["/app/docker/docker-bootstrap.sh", "app-gunicorn"]
     user: "root"
     restart: unless-stopped
     ports:
-      - 8088:8088
-    depends_on:
-      superset-init:
-        condition: service_completed_successfully
+      - 8080:8080
+    # depends_on:
+    #   superset-init:
+    #     condition: service_completed_successfully
     volumes: *superset-volumes
     environment:
       SUPERSET_LOG_LEVEL: "${SUPERSET_LOG_LEVEL:-info}"
 
   superset-init:
-    image: *superset-image
+    # image: *superset-image
+    build:
+      <<: *common-build
     container_name: superset_init
     command: ["/app/docker/docker-init.sh"]
-    env_file:
-      - path: .env # default
-        required: true
+    # env_file:
+    #   - path: docker/.env # default
+    #     required: true
     depends_on:
       db:
         condition: service_started
@@ -85,16 +121,15 @@ services:
       SUPERSET_LOG_LEVEL: "${SUPERSET_LOG_LEVEL:-info}"
 
   superset-worker:
-    image: *superset-image
+    # image: *superset-image
+    build:
+      <<: *common-build
     container_name: superset_worker
     command: ["/app/docker/docker-bootstrap.sh", "worker"]
-    env_file:
-      - path: .env # default
-        required: true
     restart: unless-stopped
-    depends_on:
-      superset-init:
-        condition: service_completed_successfully
+    # depends_on:
+    #   superset-init:
+    #     condition: service_completed_successfully
     user: "root"
     volumes: *superset-volumes
     healthcheck:
@@ -107,16 +142,15 @@ services:
       SUPERSET_LOG_LEVEL: "${SUPERSET_LOG_LEVEL:-info}"
 
   superset-worker-beat:
-    image: *superset-image
+    # image: *superset-image
+    build:
+      <<: *common-build
     container_name: superset_worker_beat
     command: ["/app/docker/docker-bootstrap.sh", "beat"]
-    env_file:
-      - path: .env # default
-        required: true
     restart: unless-stopped
-    depends_on:
-      superset-init:
-        condition: service_completed_successfully
+    # depends_on:
+    #   superset-init:
+    #     condition: service_completed_successfully
     user: "root"
     volumes: *superset-volumes
     healthcheck:
@@ -126,8 +160,5 @@ services:
 
 volumes:
   superset_home:
-    external: false
   db_home:
-    external: false
   redis:
-    external: false

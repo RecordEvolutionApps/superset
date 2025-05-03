@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 set -e
+source /app/docker/.env
 
 # Packages needed for puppeteer:
 if [ "$PUPPETEER_SKIP_CHROMIUM_DOWNLOAD" = "false" ]; then

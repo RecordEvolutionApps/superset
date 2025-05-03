@@ -39,6 +39,14 @@ COPY docker/ /app/docker/
 # Arguments for build configuration
 ARG NPM_BUILD_CMD="build"
 
+# Fix clock skew (optional, only needed if system time is wrong)
+RUN apt-get update --allow-insecure-repositories \
+ && apt-get install -y --allow-unauthenticated \
+      debian-archive-keyring \
+      gnupg \
+      ca-certificates \
+ && apt-get clean
+
 # Install system dependencies required for node-gyp
 RUN /app/docker/apt-install.sh build-essential python3 zstd
 
@@ -153,6 +161,7 @@ ENV SUPERSET_HOME="/app/superset_home" \
     SUPERSET_PORT="8088"
 
 # Copy the entrypoints, make them executable in userspace
+COPY docker /app/docker
 COPY --chmod=755 docker/entrypoints /app/docker/entrypoints
 
 WORKDIR /app
@@ -186,6 +195,14 @@ COPY scripts/check-env.py scripts/
 
 # keeping for backward compatibility
 COPY --chmod=755 ./docker/entrypoints/run-server.sh /usr/bin/
+
+# Fix clock skew (optional, only needed if system time is wrong)
+RUN apt-get update --allow-insecure-repositories \
+ && apt-get install -y --allow-unauthenticated \
+      debian-archive-keyring \
+      gnupg \
+      ca-certificates \
+ && apt-get clean
 
 # Some debian libs
 RUN /app/docker/apt-install.sh \
